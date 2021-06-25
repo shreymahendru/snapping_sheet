@@ -1,3 +1,4 @@
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:snapping_sheet/snapping_sheet.dart';
 import 'package:snapping_sheet/src/sheet_size_calculator.dart';
@@ -49,8 +50,12 @@ class _ScrollControllerOverrideState extends State<ScrollControllerOverride> {
   }
 
   void _onScrollUpdate() {
-    print(_allowScrolling);
-    if (!_allowScrolling) _lockScrollPosition(widget.scrollController);
+    // allow scrolling if scrolling is done programmatically
+    // doing this to make sure no matter what where the sheet is snapped
+    // we should be able to scroll
+    final isAnimating =
+        widget.scrollController.position.userScrollDirection == ScrollDirection.idle;
+    if (!_allowScrolling && !isAnimating) _lockScrollPosition(widget.scrollController);
   }
 
   void _overrideScroll(double dragAmount) {
