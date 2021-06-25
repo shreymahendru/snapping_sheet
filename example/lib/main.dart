@@ -9,33 +9,54 @@ void main() {
 class SimpleSnappingSheet extends StatelessWidget {
   final ScrollController listViewController = new ScrollController();
 
+  final controller = SnappingSheetController();
+
   @override
   Widget build(BuildContext context) {
     return SnappingSheet(
-      child: Background(),
-      lockOverflowDrag: true,
+      child: Background(
+        onPressed: () async {
+          controller.snapToPosition(
+            SnappingPosition.factor(
+              grabbingContentOffset: GrabbingContentOffset.bottom,
+              positionFactor: 0.99,
+            ),
+          );
+
+          this
+              .listViewController
+              .animateTo(1400, duration: Duration(milliseconds: 500), curve: Curves.easeIn);
+        },
+      ),
+      lockOverflowDrag: false,
+      controller: controller,
       snappingPositions: [
         SnappingPosition.factor(
-          positionFactor: 0.0,
-          snappingCurve: Curves.easeOutExpo,
-          snappingDuration: Duration(seconds: 1),
-          grabbingContentOffset: GrabbingContentOffset.top,
+          positionFactor: 0.1,
+          grabbingContentOffset: GrabbingContentOffset.bottom,
         ),
         SnappingPosition.factor(
-          snappingCurve: Curves.elasticOut,
-          snappingDuration: Duration(milliseconds: 1750),
           positionFactor: 0.5,
+          grabbingContentOffset: GrabbingContentOffset.bottom,
         ),
         SnappingPosition.factor(
           grabbingContentOffset: GrabbingContentOffset.bottom,
-          snappingCurve: Curves.easeInExpo,
-          snappingDuration: Duration(seconds: 1),
-          positionFactor: 0.9,
+          positionFactor: 0.99,
         ),
       ],
       grabbing: GrabbingWidget(),
       grabbingHeight: 75,
       sheetAbove: null,
+      onSnapCompleted: (positionData, position) {
+        print(positionData.relativeToSheetHeight);
+        print(positionData.relativeToSnappingPositions);
+
+        if (positionData.relativeToSnappingPositions == 0) {
+          this.listViewController.jumpTo(0);
+        }
+        print(position);
+        print(position);
+      },
       sheetBelow: SnappingSheetContent(
         draggable: true,
         childScrollController: listViewController,
@@ -63,14 +84,17 @@ class SimpleSnappingSheet extends StatelessWidget {
 /// Widgets below are just helper widgets for this example
 
 class Background extends StatelessWidget {
+  final VoidCallback onPressed;
+
+  const Background({Key? key, required this.onPressed}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.grey[200],
-      child: Placeholder(
-        color: Colors.green[200]!,
-      ),
-    );
+        color: Colors.grey[200],
+        child: TextButton(
+          child: Text("Press"),
+          onPressed: onPressed,
+        ));
   }
 }
 
